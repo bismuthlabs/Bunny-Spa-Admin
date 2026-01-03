@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Plus, Users, Briefcase } from "lucide-react"
 import Link from "next/link"
+import { Header } from "@/components/header"
+import { useState } from "react"
 
 // Mock data
 const mockStats = [
@@ -44,9 +46,13 @@ const mockServiceBreakdown = [
   { type: "Home Services", count: 58, percentage: 37 },
 ]
 
+
+
 export default function DashboardPage() {
+  const [dateRange, setDateRange] = useState({ from: new Date("2025-01-01"), to: new Date() })
   return (
     <div className="space-y-6">
+        <Header dateRange={dateRange} setDateRange={setDateRange} />
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {mockStats.map((stat, idx) => (
@@ -87,8 +93,8 @@ export default function DashboardPage() {
           <CardContent className="space-y-3">
             <Link href="/dashboard/sales?action=new" className="block">
               <Button className="w-full" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                New Sale
+                {/* <Plus className="mr-2 h-4 w-4" /> */}
+                Add New Sale
               </Button>
             </Link>
             <Link href="/dashboard/clients" className="block">

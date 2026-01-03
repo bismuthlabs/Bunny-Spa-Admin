@@ -23,7 +23,7 @@ export function Sidebar() {
     <>
       {/* Mobile toggle button */}
       <Button
-        variant="ghost"
+        variant="default"
         size="icon"
         className="absolute left-4 top-4 md:hidden z-40"
         onClick={() => setIsOpen(!isOpen)}
