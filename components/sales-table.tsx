@@ -1,0 +1,201 @@
+"use client"
+
+import { useState, useMemo } from "react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
+import { MoreHorizontal, Search } from "lucide-react"
+
+interface Sale {
+  id: string
+  date: string
+  time: string
+  serviceName: string
+  locationType: "In-Shop" | "Home" | "Hotel"
+  clientName: string
+  staffName: string
+  price: number
+  discount: number
+  amountPaid: number
+  balance: number
+  paymentMethod: string
+  profit: number
+  status: "Completed" | "Cancelled"
+}
+
+const mockSales: Sale[] = [
+  {
+    id: "SAL001",
+    date: "2025-01-03",
+    time: "10:00 - 11:30",
+    serviceName: "Swedish Massage",
+    locationType: "In-Shop",
+    clientName: "Sarah Johnson",
+    staffName: "Maria Garcia",
+    price: 120,
+    discount: 0,
+    amountPaid: 120,
+    balance: 0,
+    paymentMethod: "Cash",
+    profit: 85,
+    status: "Completed",
+  },
+  {
+    id: "SAL002",
+    date: "2025-01-03",
+    time: "14:00 - 15:30",
+    serviceName: "Deep Tissue Massage",
+    locationType: "Home",
+    clientName: "Michael Chen",
+    staffName: "John Smith",
+    price: 150,
+    discount: 10,
+    amountPaid: 140,
+    balance: 0,
+    paymentMethod: "Mobile Money",
+    profit: 95,
+    status: "Completed",
+  },
+  {
+    id: "SAL003",
+    date: "2025-01-02",
+    time: "11:00 - 12:00",
+    serviceName: "Hot Stone Massage",
+    locationType: "In-Shop",
+    clientName: "Emily Davis",
+    staffName: "Maria Garcia",
+    price: 100,
+    discount: 0,
+    amountPaid: 50,
+    balance: 50,
+    paymentMethod: "Transfer",
+    profit: 70,
+    status: "Completed",
+  },
+]
+
+export function SalesTable() {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortBy, setSortBy] = useState<keyof Sale>("date")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+
+  const filteredAndSortedSales = useMemo(() => {
+    return mockSales
+      .filter(
+        (sale) =>
+          sale.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          sale.serviceName.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+      .sort((a, b) => {
+        const aVal = a[sortBy]
+        const bVal = b[sortBy]
+
+        if (typeof aVal === "string") {
+          return sortOrder === "asc" ? aVal.localeCompare(bVal as string) : (bVal as string).localeCompare(aVal)
+        }
+
+        return sortOrder === "asc" ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number)
+      })
+  }, [searchTerm, sortBy, sortOrder])
+
+  const handleSort = (column: keyof Sale) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(column)
+      setSortOrder("desc")
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row gap-2">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by client or service..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="cursor-pointer" onClick={() => handleSort("date")}>
+                Date
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("serviceName")}>
+                Service
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("clientName")}>
+                Client
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("locationType")}>
+                Location
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("price")}>
+                Price
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("amountPaid")}>
+                Paid
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("balance")}>
+                Balance
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("status")}>
+                Status
+              </TableHead>
+              <TableHead className="w-10"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredAndSortedSales.map((sale) => (
+              <TableRow key={sale.id}>
+                <TableCell className="font-medium">{sale.date}</TableCell>
+                <TableCell className="text-sm">{sale.serviceName}</TableCell>
+                <TableCell className="text-sm">{sale.clientName}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="bg-secondary/20 text-secondary-foreground">
+                    {sale.locationType}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm font-semibold">${sale.price}</TableCell>
+                <TableCell className="text-sm">${sale.amountPaid}</TableCell>
+                <TableCell className={`text-sm font-semibold ${sale.balance > 0 ? "text-red-600" : ""}`}>
+                  ${sale.balance}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    className={sale.status === "Completed" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
+                  >
+                    {sale.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View Details</DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
