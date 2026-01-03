@@ -69,7 +69,7 @@ export function AddSaleModal({ open, onOpenChange }: AddSaleModalProps) {
           <DialogTitle>Record New Sale</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
           {/* Date and Time */}
           <div>
             <Label htmlFor="date">Service Date</Label>
