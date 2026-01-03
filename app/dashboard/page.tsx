@@ -51,7 +51,7 @@ const mockServiceBreakdown = [
 export default function DashboardPage() {
   const [dateRange, setDateRange] = useState({ from: new Date("2025-01-01"), to: new Date() })
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-18 md:mt-0">
         <Header dateRange={dateRange} setDateRange={setDateRange} />
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

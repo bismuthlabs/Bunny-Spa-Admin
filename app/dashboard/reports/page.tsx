@@ -41,7 +41,7 @@ const COLORS = ["#6b8e7f", "#9db4a8"]
 
 export default function ReportsPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-18 md:mt-0">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Reports & Analytics</h1>
