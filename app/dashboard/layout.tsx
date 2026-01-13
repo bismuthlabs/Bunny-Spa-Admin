@@ -1,10 +1,11 @@
 "use client"
 
 import type React from "react"
-
 import { Sidebar } from "@/components/sidebar"
-import { Header } from "@/components/header"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAuth } from "@/components/auth-context"
+import { redirect } from "next/navigation"
+import { Loader2 } from "lucide-react"
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,21 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [dateRange, setDateRange] = useState({ from: new Date("2025-01-01"), to: new Date() })
+  const { session, loading } = useAuth()
+
+  useEffect(() => {
+    if (!loading && !session) {
+      redirect("/auth/login")
+    }
+  }, [session, loading])
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-screen bg-background">

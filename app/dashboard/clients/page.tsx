@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { formatCurrency } from "@/lib/currency"
 
 const mockClients = [
   {
@@ -75,7 +76,7 @@ export default function ClientsPage() {
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Avg. Spending</p>
             <p className="text-3xl font-bold text-foreground mt-2">
-              ${Math.round(mockClients.reduce((sum, c) => sum + c.totalSpent, 0) / mockClients.length)}
+              {formatCurrency(Math.round(mockClients.reduce((sum, c) => sum + c.totalSpent, 0) / mockClients.length))}
             </p>
             <p className="text-xs text-muted-foreground mt-1">per client</p>
           </CardContent>
@@ -106,7 +107,7 @@ export default function ClientsPage() {
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell className="text-sm">{client.phone}</TableCell>
                     <TableCell className="text-sm">{client.visits}</TableCell>
-                    <TableCell className="text-sm font-semibold">${client.totalSpent}</TableCell>
+                    <TableCell className="text-sm font-semibold">{formatCurrency(client.totalSpent)}</TableCell>
                     <TableCell className="text-sm">{client.lastVisit}</TableCell>
                     <TableCell>
                       <Badge

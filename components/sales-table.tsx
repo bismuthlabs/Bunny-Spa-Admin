@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal, Search } from "lucide-react"
+import { formatCurrency } from "@/lib/currency"
 
 interface Sale {
   id: string
@@ -165,10 +166,10 @@ export function SalesTable() {
                     {sale.locationType}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm font-semibold">${sale.price}</TableCell>
-                <TableCell className="text-sm">${sale.amountPaid}</TableCell>
+                <TableCell className="text-sm font-semibold">{formatCurrency(sale.price)}</TableCell>
+                <TableCell className="text-sm">{formatCurrency(sale.amountPaid)}</TableCell>
                 <TableCell className={`text-sm font-semibold ${sale.balance > 0 ? "text-red-600" : ""}`}>
-                  ${sale.balance}
+                  {formatCurrency(sale.balance)}
                 </TableCell>
                 <TableCell>
                   <Badge
