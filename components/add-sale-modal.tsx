@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { formatCurrency } from "@/lib/currency"
 
 interface AddSaleModalProps {
   open: boolean
@@ -263,7 +264,7 @@ export function AddSaleModal({ open, onOpenChange }: AddSaleModalProps) {
           <div>
             <Label>Staff Commission Amount</Label>
             <div className="mt-1 px-3 py-2 bg-muted rounded-md text-sm font-semibold">
-              ${staffCommissionAmount.toFixed(2)}
+              {formatCurrency(staffCommissionAmount)}
             </div>
           </div>
 
@@ -272,7 +273,7 @@ export function AddSaleModal({ open, onOpenChange }: AddSaleModalProps) {
             <div
               className={`mt-1 px-3 py-2 bg-muted rounded-md text-sm font-semibold ${profit > 0 ? "text-green-600" : ""}`}
             >
-              ${profit.toFixed(2)}
+              {formatCurrency(profit)}
             </div>
           </div>
 

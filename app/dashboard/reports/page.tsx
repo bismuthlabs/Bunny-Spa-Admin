@@ -16,6 +16,7 @@ import {
   Cell,
 } from "recharts"
 import { Download } from "lucide-react"
+import { formatCurrency } from "@/lib/currency"
 
 const revenueByService = [
   { name: "Swedish Massage", revenue: 3200, profit: 2240 },
@@ -64,7 +65,7 @@ export default function ReportsPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip formatter={(value) => formatCurrency(value as number)} />
                 <Legend />
                 <Bar dataKey="revenue" fill="#6b8e7f" name="Revenue" />
                 <Bar dataKey="profit" fill="#9db4a8" name="Profit" />
@@ -85,7 +86,7 @@ export default function ReportsPage() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) => `${name}: $${value}`}
+                  label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
@@ -94,7 +95,7 @@ export default function ReportsPage() {
                     <Cell key={`cell-${index}`} fill={color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => `$${value}`} />
+                <Tooltip formatter={(value) => formatCurrency(value as number)} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -110,7 +111,7 @@ export default function ReportsPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={150} />
-                <Tooltip />
+                <Tooltip formatter={(value) => formatCurrency(value as number)} />
                 <Bar dataKey="value" fill="#6b8e7f" name="Revenue" radius={[0, 8, 8, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -126,7 +127,7 @@ export default function ReportsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Avg Service Value</p>
-              <p className="text-2xl font-bold text-foreground mt-1">$124</p>
+              <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(124)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Profit Margin</p>

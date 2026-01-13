@@ -4,32 +4,31 @@ import { StatCard } from "@/components/stat-card"
 import { SalesTable } from "@/components/sales-table"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Plus, Users, Briefcase } from "lucide-react"
+import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Users, Briefcase } from "lucide-react"
 import Link from "next/link"
 import { Header } from "@/components/header"
 import { useState } from "react"
 
-// Mock data
 const mockStats = [
   {
     icon: DollarSign,
     label: "Total Revenue (Month)",
-    value: "$12,450",
+    value: "₵12,450",
     change: "+12% from last month",
     trend: "up" as const,
   },
   {
     icon: TrendingUp,
     label: "Total Profit",
-    value: "$8,320",
+    value: "₵8,320",
     change: "+8% from last month",
     trend: "up" as const,
   },
   {
     icon: AlertCircle,
     label: "Outstanding Balance",
-    value: "$2,130",
-    change: "+$450 due",
+    value: "₵2,130",
+    change: "+₵450 due",
     trend: "down" as const,
   },
   {
@@ -46,13 +45,11 @@ const mockServiceBreakdown = [
   { type: "Home Services", count: 58, percentage: 37 },
 ]
 
-
-
 export default function DashboardPage() {
   const [dateRange, setDateRange] = useState({ from: new Date("2025-01-01"), to: new Date() })
   return (
     <div className="space-y-6 mt-18 md:mt-0">
-        <Header dateRange={dateRange} setDateRange={setDateRange} />
+      <Header dateRange={dateRange} setDateRange={setDateRange} />
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {mockStats.map((stat, idx) => (

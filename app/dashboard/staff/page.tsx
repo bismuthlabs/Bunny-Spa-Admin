@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { formatCurrency } from "@/lib/currency"
 
 const mockStaff = [
   {
@@ -77,7 +78,7 @@ export default function StaffPage() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Total Commissions</p>
-            <p className="text-3xl font-bold text-foreground mt-2">${totalEarnings}</p>
+            <p className="text-3xl font-bold text-foreground mt-2">{formatCurrency(totalEarnings)}</p>
             <p className="text-xs text-muted-foreground mt-1">this month</p>
           </CardContent>
         </Card>
@@ -114,7 +115,7 @@ export default function StaffPage() {
                     <TableCell className="font-medium">{staff.name}</TableCell>
                     <TableCell className="text-sm">{staff.role}</TableCell>
                     <TableCell className="text-sm">{staff.services}</TableCell>
-                    <TableCell className="text-sm font-semibold">${staff.commission}</TableCell>
+                    <TableCell className="text-sm font-semibold">{formatCurrency(staff.commission)}</TableCell>
                     <TableCell className="text-sm">{staff.rating}★</TableCell>
                     <TableCell>
                       <Badge
