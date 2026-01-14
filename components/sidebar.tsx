@@ -29,7 +29,7 @@ export function Sidebar() {
       {/* Mobile toggle button */}
       <Button
         variant="default"
-        size="icon"
+        size="icon-lg"
         className="fixed left-4 top-4 md:hidden z-40"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -39,7 +39,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed md:static z-30 h-screen w-64 border-r border-border bg-sidebar text-sidebar-foreground transition-transform duration-200 flex flex-col",
+          "fixed md:static z-50 h-screen w-74 border-r border-border bg-sidebar text-sidebar-foreground transition-transform duration-200 flex flex-col",
           !isOpen && "-translate-x-full md:translate-x-0"
         )}
       >

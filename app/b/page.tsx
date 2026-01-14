@@ -119,19 +119,19 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Link href="/b/sales?action=new" className="block">
-              <Button className="w-full" size="sm">
+              <Button className="w-full">
                 <Plus className="mr-2 h-4 w-4" />
                 Add New Sale
               </Button>
             </Link>
             <Link href="/b/clients" className="block">
-              <Button variant="outline" className="w-full bg-transparent" size="sm">
+              <Button variant="outline" className="w-full bg-transparent">
                 <Users className="mr-2 h-4 w-4" />
                 View Clients
               </Button>
             </Link>
             <Link href="/b/staff" className="block">
-              <Button variant="outline" className="w-full bg-transparent" size="sm">
+              <Button variant="outline" className="w-full bg-transparent">
                 <Briefcase className="mr-2 h-4 w-4" />
                 Staff Info
               </Button>
