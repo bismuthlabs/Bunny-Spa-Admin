@@ -4,8 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-context"
-import "./globals.css"
 import { Sidebar } from "@/components/sidebar"
+import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -43,8 +43,12 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-          <Sidebar />
-            {children}
+            <div className="flex h-scree">
+              <Sidebar />
+              <main className="flex-1 overflow-x-auto bg-background p-4 md:p-6 lg:p-8">
+                {children}
+              </main>
+            </div>
           </AuthProvider>
         </ThemeProvider>
         <Analytics />
