@@ -9,10 +9,12 @@ if (!SUPABASE_SERVICE_ROLE_KEY) throw new Error('Missing SUPABASE_SERVICE_ROLE_K
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 const DEFAULT_TTL = (process.env.SESSION_TTL_SECONDS ? parseInt(process.env.SESSION_TTL_SECONDS, 10) : 3600)
+// Optional: longer TTL for remember-me. Configure via env var; default fallback is 24x DEFAULT_TTL
+const REMEMBER_TTL = (process.env.SESSION_TTL_REMEMBER_SECONDS ? parseInt(process.env.SESSION_TTL_REMEMBER_SECONDS, 10) : DEFAULT_TTL * 24)
 
 export async function POST(req: Request) {
   try {
-    const { passcode } = await req.json()
+    const { passcode, rememberMe } = await req.json()
     if (!passcode || typeof passcode !== 'string') return NextResponse.json({ error: 'Missing passcode' }, { status: 400 })
 
     // Fetch active codes
@@ -27,10 +29,14 @@ export async function POST(req: Request) {
         const match = await bcrypt.compare(passcode, c.hashed_code)
         if (match) {
           const issuedAt = Date.now()
-          const expiresAt = issuedAt + DEFAULT_TTL * 1000
+          // Choose ttl based on rememberMe flag (server-side only)
+          const ttl = rememberMe === true ? REMEMBER_TTL : DEFAULT_TTL
+          const expiresAt = issuedAt + ttl * 1000
           const payload = { role: c.role, issuedAt, expiresAt }
+
           const res = NextResponse.json({ ok: true, role: c.role })
-          createSessionCookie(res, payload, DEFAULT_TTL)
+          // Use TTL value to set Max-Age on the cookie
+          createSessionCookie(res, payload, ttl)
           return res
         }
       } catch (err) {
