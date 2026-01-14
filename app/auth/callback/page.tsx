@@ -7,4 +7,3 @@ export default function DeprecatedCallback() {
   // This endpoint no longer handles magic-link callbacks. Please use the /unlock flow.
   redirect('/unlock')
 }
-}
