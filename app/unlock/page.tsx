@@ -21,6 +21,7 @@ export default function UnlockPage() {
     try {
       const res = await fetch('/api/unlock', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ passcode }),
       })
@@ -28,7 +29,8 @@ export default function UnlockPage() {
       if (!res.ok) {
         setError(json.error || 'Invalid passcode')
       } else {
-        router.push('/dashboard')
+        // Perform a hard navigation so the newly-set HttpOnly cookie is included in the next request
+        window.location.assign('/dashboard')
       }
     } catch (err) {
       setError('Server error')
