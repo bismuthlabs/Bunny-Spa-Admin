@@ -18,6 +18,7 @@ Server-side enforcement:
 
 - The app sends magic links using a server-only endpoint (`POST /api/auth/send-magic-link`) which will only send a link if an active profile exists for the email.
 - The callback at `/auth/callback` checks that the logged-in user has an active `profiles` entry and redirects based on role (`owner` → `/dashboard`, `manager` → `/dashboard?view=ops`).
+- Admin UI is available at `/dashboard/admin` (owner-only) to create/activate/deactivate profiles and set roles.
 
 Creating users and profiles (recommended admin flow):
 
