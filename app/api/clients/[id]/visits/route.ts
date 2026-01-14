@@ -15,7 +15,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const clientId = params.id
+    const clientId = await params.id
     if (!clientId) return NextResponse.json({ error: "Missing client ID" }, { status: 400 })
 
     // Fetch recent visits for this client (limit 20, sorted by date descending)
