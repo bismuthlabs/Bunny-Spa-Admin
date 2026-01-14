@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
 import {
   BarChart,
   Bar,
@@ -18,29 +19,28 @@ import {
 import { Download } from "lucide-react"
 import { formatCurrency } from "@/lib/currency"
 
-const revenueByService = [
-  { name: "Swedish Massage", revenue: 3200, profit: 2240 },
-  { name: "Deep Tissue", revenue: 2800, profit: 1960 },
-  { name: "Hot Stone", revenue: 2400, profit: 1680 },
-  { name: "Aromatherapy", revenue: 2000, profit: 1400 },
-  { name: "Reflexology", revenue: 2050, profit: 1435 },
-]
-
-const revenueByStaff = [
-  { name: "Maria Garcia", value: 4200 },
-  { name: "Lisa Wong", value: 3800 },
-  { name: "John Smith", value: 2900 },
-  { name: "Robert Lee", value: 1550 },
-]
-
-const locationData = [
-  { name: "In-Shop", value: 7500 },
-  { name: "Home", value: 4950 },
-]
-
-const COLORS = ["#6b8e7f", "#9db4a8"]
-
 export default function ReportsPage() {
+  const [overview, setOverview] = useState<any | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    fetch('/api/reports/overview')
+      .then((r) => r.json())
+      .then((p) => {
+        if (!mounted) return
+        if (!p?.error) setOverview(p)
+      })
+      .catch(() => {})
+    return () => { mounted = false }
+  }, [])
+
+  const revenueByService = (overview?.revenueByService || []).map((r: any) => ({ name: r.service_name, revenue: Number(r.total_revenue || 0), profit: Number(r.total_profit || 0) }))
+  const revenueByStaff = (overview?.revenueByStaff || []).map((r: any) => ({ name: r.staff?.name || r.staff_name || 'Unknown', value: Number(r.total_revenue || r.value || 0) }))
+  const locationData = (overview?.locationData || []).map((l: any) => ({ name: l.location_type, value: Number(l.value || 0) }))
+  const COLORS = ["#6b8e7f", "#9db4a8"]
+
+  const key = overview?.keyMetrics || { avgServiceValue: 0, profitMargin: 0, utilizationRate: 0 }
+
   return (
     <div className="space-y-6 mt-18 md:mt-0">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -127,15 +127,15 @@ export default function ReportsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Avg Service Value</p>
-              <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(124)}</p>
+              <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(key.avgServiceValue || 0)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Profit Margin</p>
-              <p className="text-2xl font-bold text-foreground mt-1">67%</p>
+              <p className="text-2xl font-bold text-foreground mt-1">{(key.profitMargin || 0)}%</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Utilization Rate</p>
-              <p className="text-2xl font-bold text-foreground mt-1">78%</p>
+              <p className="text-2xl font-bold text-foreground mt-1">{(key.utilizationRate || 0)}%</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Month-over-Month</p>

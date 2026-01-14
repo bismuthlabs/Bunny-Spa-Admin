@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,64 +26,54 @@ interface Sale {
   status: "Completed" | "Cancelled"
 }
 
-const mockSales: Sale[] = [
-  {
-    id: "SAL001",
-    date: "2025-01-03",
-    time: "10:00 - 11:30",
-    serviceName: "Swedish Massage",
-    locationType: "In-Shop",
-    clientName: "Sarah Johnson",
-    staffName: "Maria Garcia",
-    price: 120,
-    discount: 0,
-    amountPaid: 120,
-    balance: 0,
-    paymentMethod: "Cash",
-    profit: 85,
-    status: "Completed",
-  },
-  {
-    id: "SAL002",
-    date: "2025-01-03",
-    time: "14:00 - 15:30",
-    serviceName: "Deep Tissue Massage",
-    locationType: "Home",
-    clientName: "Michael Chen",
-    staffName: "John Smith",
-    price: 150,
-    discount: 10,
-    amountPaid: 140,
-    balance: 0,
-    paymentMethod: "Mobile Money",
-    profit: 95,
-    status: "Completed",
-  },
-  {
-    id: "SAL003",
-    date: "2025-01-02",
-    time: "11:00 - 12:00",
-    serviceName: "Hot Stone Massage",
-    locationType: "In-Shop",
-    clientName: "Emily Davis",
-    staffName: "Maria Garcia",
-    price: 100,
-    discount: 0,
-    amountPaid: 50,
-    balance: 50,
-    paymentMethod: "Transfer",
-    profit: 70,
-    status: "Completed",
-  },
-]
-
 export function SalesTable() {
+const [sales, setSales] = useState<Sale[] | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<keyof Sale>("date")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
+  // Fetch recent sales from server
+  useEffect(() => {
+    let mounted = true
+    setLoading(true)
+    fetch("/api/sales")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (!mounted) return
+        if (payload?.error) return setError(payload.error)
+
+        const mapped: Sale[] = (payload.data || []).map((raw: any) => ({
+          id: raw.id,
+          date: raw.service_date || raw.date || "",
+          time: (raw.start_time ? `${raw.start_time}` : "") + (raw.end_time ? ` - ${raw.end_time}` : ""),
+          serviceName: raw.services?.name || raw.service_name || raw.serviceName || "",
+          locationType: raw.location_type || "In-Shop",
+          clientName: raw.clients?.name || raw.clientName || "",
+          staffName: raw.staff?.name || raw.staffName || "",
+          price: Number(raw.price || 0),
+          discount: Number(raw.discount || 0),
+          amountPaid: Number(raw.amount_paid || 0),
+          balance: Number(raw.balance || 0),
+          paymentMethod: raw.payment_method || raw.paymentMethod || "",
+          profit: Number(raw.profit || 0),
+          status: raw.status || "Completed",
+        }))
+
+        setSales(mapped)
+      })
+      .catch((err) => setError(String(err)))
+      .finally(() => setLoading(false))
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   const filteredAndSortedSales = useMemo(() => {
-    return mockSales
+    const list = sales || []
+    return list
       .filter(
         (sale) =>
           sale.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -97,9 +87,9 @@ export function SalesTable() {
           return sortOrder === "asc" ? aVal.localeCompare(bVal as string) : (bVal as string).localeCompare(aVal)
         }
 
-        return sortOrder === "asc" ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number)
+        return sortOrder === "asc" ? (Number(aVal) || 0) - (Number(bVal) || 0) : (Number(bVal) || 0) - (Number(aVal) || 0)
       })
-  }, [searchTerm, sortBy, sortOrder])
+  }, [sales, searchTerm, sortBy, sortOrder])
 
   const handleSort = (column: keyof Sale) => {
     if (sortBy === column) {

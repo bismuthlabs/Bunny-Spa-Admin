@@ -18,7 +18,7 @@ export default function SalesPage() {
           <p className="text-muted-foreground mt-1">Record and track all service sales</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)} className="md:w-auto">
-          {/* <Plus className="mr-2 h-4 w-4" /> */}
+          <Plus className="mr-2 h-4 w-4" />
           Add New Sale
         </Button>
       </div>

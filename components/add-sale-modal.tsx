@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,11 +19,13 @@ export function AddSaleModal({ open, onOpenChange }: AddSaleModalProps) {
     date: new Date().toISOString().split("T")[0],
     startTime: "10:00",
     endTime: "11:00",
-    serviceName: "Swedish Massage",
+    serviceId: "",
+    serviceName: "",
     locationType: "In-Shop",
     clientName: "",
     clientPhone: "",
-    staffName: "Maria Garcia",
+    staffId: "",
+    staffName: "",
     price: "100",
     discount: "0",
     amountPaid: "100",
@@ -33,6 +35,30 @@ export function AddSaleModal({ open, onOpenChange }: AddSaleModalProps) {
     staffCommission: "35",
     notes: "",
   })
+
+  const [services, setServices] = useState<any[]>([])
+  const [staffList, setStaffList] = useState<any[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    fetch('/api/services')
+      .then((r) => r.json())
+      .then((p) => {
+        if (!mounted) return
+        if (p?.data) setServices(p.data)
+      })
+      .catch(() => {})
+
+    fetch('/api/staff')
+      .then((r) => r.json())
+      .then((p) => {
+        if (!mounted) return
+        if (p?.data) setStaffList(p.data)
+      })
+      .catch(() => {})
+
+    return () => { mounted = false }
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => {
@@ -113,16 +139,26 @@ export function AddSaleModal({ open, onOpenChange }: AddSaleModalProps) {
           {/* Service Details */}
           <div>
             <Label htmlFor="serviceName">Service Name</Label>
-            <Select value={formData.serviceName} onValueChange={(v) => handleInputChange("serviceName", v)}>
+            <Select
+              value={formData.serviceId}
+              onValueChange={(v) => {
+                const svc = services.find((s) => s.id === v)
+                handleInputChange("serviceId", v)
+                if (svc) {
+                  handleInputChange("serviceName", svc.name)
+                  handleInputChange("price", String(svc.default_price || 0))
+                }
+              }}
+            >
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Swedish Massage">Swedish Massage</SelectItem>
-                <SelectItem value="Deep Tissue Massage">Deep Tissue Massage</SelectItem>
-                <SelectItem value="Hot Stone Massage">Hot Stone Massage</SelectItem>
-                <SelectItem value="Aromatherapy">Aromatherapy</SelectItem>
-                <SelectItem value="Reflexology">Reflexology</SelectItem>
+                {services.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -165,14 +201,23 @@ export function AddSaleModal({ open, onOpenChange }: AddSaleModalProps) {
           {/* Staff and Pricing */}
           <div>
             <Label htmlFor="staffName">Staff Name</Label>
-            <Select value={formData.staffName} onValueChange={(v) => handleInputChange("staffName", v)}>
+            <Select
+              value={formData.staffId}
+              onValueChange={(v) => {
+                const s = staffList.find((x) => x.id === v)
+                handleInputChange("staffId", v)
+                if (s) handleInputChange("staffName", s.name)
+              }}
+            >
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Maria Garcia">Maria Garcia</SelectItem>
-                <SelectItem value="John Smith">John Smith</SelectItem>
-                <SelectItem value="Lisa Wong">Lisa Wong</SelectItem>
+                {staffList.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -294,7 +339,55 @@ export function AddSaleModal({ open, onOpenChange }: AddSaleModalProps) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={() => onOpenChange(false)} className="bg-primary">
+          <Button
+            onClick={async () => {
+              // minimal create logic, server-side validation is authoritative
+              try {
+                // create client if a name is provided
+                let clientId: string | undefined = undefined
+                if (formData.clientName && formData.clientName.trim()) {
+                  const creRes = await fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: formData.clientName, phone: formData.clientPhone }),
+                  })
+                  const creJson = await creRes.json()
+                  if (creJson?.id) clientId = creJson.id
+                }
+
+                const payload = {
+                  service_id: formData.serviceId || undefined,
+                  client_id: clientId,
+                  staff_id: formData.staffId || undefined,
+                  service_date: formData.date,
+                  start_time: formData.startTime,
+                  end_time: formData.endTime,
+                  price: formData.price,
+                  discount: formData.discount,
+                  amount_paid: formData.amountPaid,
+                  payment_method: formData.paymentMethod,
+                  location_type: formData.locationType,
+                  transport_cost: formData.transportCost,
+                  other_expenses: formData.otherExpenses,
+                  staff_commission_pct: formData.staffCommission,
+                  notes: formData.notes,
+                }
+
+                await fetch('/api/sales', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload),
+                })
+
+                onOpenChange(false)
+                // TODO: consider optimistic UI / refresh sales table via context or event
+              } catch (err) {
+                console.error(err)
+                onOpenChange(false)
+              }
+            }}
+            className="bg-primary"
+          >
             Save Sale
           </Button>
         </div>

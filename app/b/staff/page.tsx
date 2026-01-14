@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -8,48 +9,24 @@ import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatCurrency } from "@/lib/currency"
 
-const mockStaff = [
-  {
-    id: 1,
-    name: "Maria Garcia",
-    role: "Massage Therapist",
-    services: 45,
-    commission: 1575,
-    rating: 4.9,
-    payoutStatus: "Paid",
-  },
-  {
-    id: 2,
-    name: "John Smith",
-    role: "Massage Therapist",
-    services: 38,
-    commission: 1330,
-    rating: 4.7,
-    payoutStatus: "Pending",
-  },
-  {
-    id: 3,
-    name: "Lisa Wong",
-    role: "Massage Therapist",
-    services: 52,
-    commission: 1820,
-    rating: 4.8,
-    payoutStatus: "Paid",
-  },
-  {
-    id: 4,
-    name: "Robert Lee",
-    role: "Massage Therapist",
-    services: 21,
-    commission: 735,
-    rating: 4.6,
-    payoutStatus: "Pending",
-  },
-]
-
 export default function StaffPage() {
-  const totalEarnings = mockStaff.reduce((sum, staff) => sum + staff.commission, 0)
-  const avgRating = (mockStaff.reduce((sum, staff) => sum + staff.rating, 0) / mockStaff.length).toFixed(1)
+  const [staff, setStaff] = useState<any[] | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    fetch('/api/staff')
+      .then((r) => r.json())
+      .then((p) => {
+        if (!mounted) return
+        if (p?.data) setStaff(p.data)
+      })
+      .catch(() => {})
+    return () => { mounted = false }
+  }, [])
+
+  const list = staff || []
+  const totalEarnings = list.reduce((sum, s) => sum + (s.commission || 0), 0)
+  const avgRating = list.length ? (list.reduce((sum, s) => sum + (s.rating || 0), 0) / list.length).toFixed(1) : '0.0'
 
   return (
     <div className="space-y-6 mt-18 md:mt-0">
@@ -62,16 +39,14 @@ export default function StaffPage() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Total Staff</p>
-            <p className="text-3xl font-bold text-foreground mt-2">{mockStaff.length}</p>
+            <p className="text-3xl font-bold text-foreground mt-2">{list.length}</p>
             <p className="text-xs text-muted-foreground mt-1">Active therapists</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Total Services</p>
-            <p className="text-3xl font-bold text-foreground mt-2">
-              {mockStaff.reduce((sum, s) => sum + s.services, 0)}
-            </p>
+            <p className="text-3xl font-bold text-foreground mt-2">{list.reduce((sum, s) => sum + (s.services || 0), 0)}</p>
             <p className="text-xs text-muted-foreground mt-1">completed</p>
           </CardContent>
         </Card>
@@ -110,22 +85,22 @@ export default function StaffPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockStaff.map((staff) => (
+                {list.map((staff) => (
                   <TableRow key={staff.id}>
                     <TableCell className="font-medium">{staff.name}</TableCell>
                     <TableCell className="text-sm">{staff.role}</TableCell>
-                    <TableCell className="text-sm">{staff.services}</TableCell>
-                    <TableCell className="text-sm font-semibold">{formatCurrency(staff.commission)}</TableCell>
-                    <TableCell className="text-sm">{staff.rating}★</TableCell>
+                    <TableCell className="text-sm">{staff.services || 0}</TableCell>
+                    <TableCell className="text-sm font-semibold">{formatCurrency(staff.commission || 0)}</TableCell>
+                    <TableCell className="text-sm">{(staff.rating || 0)}★</TableCell>
                     <TableCell>
                       <Badge
                         className={
-                          staff.payoutStatus === "Paid"
+                          staff.payout_status === "Paid" || staff.payoutStatus === "Paid"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
                         }
                       >
-                        {staff.payoutStatus}
+                        {staff.payout_status || staff.payoutStatus || 'Pending'}
                       </Badge>
                     </TableCell>
                     <TableCell>

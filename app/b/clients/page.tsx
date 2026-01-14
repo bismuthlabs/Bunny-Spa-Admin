@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -8,46 +9,23 @@ import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatCurrency } from "@/lib/currency"
 
-const mockClients = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    phone: "+1-555-0101",
-    visits: 12,
-    totalSpent: 1440,
-    lastVisit: "2025-01-03",
-    status: "Regular",
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    phone: "+1-555-0102",
-    visits: 8,
-    totalSpent: 1200,
-    lastVisit: "2025-01-03",
-    status: "Regular",
-  },
-  {
-    id: 3,
-    name: "Emily Davis",
-    phone: "+1-555-0103",
-    visits: 3,
-    totalSpent: 300,
-    lastVisit: "2025-01-02",
-    status: "New",
-  },
-  {
-    id: 4,
-    name: "James Wilson",
-    phone: "+1-555-0104",
-    visits: 15,
-    totalSpent: 1950,
-    lastVisit: "2024-12-28",
-    status: "VIP",
-  },
-]
-
 export default function ClientsPage() {
+  const [clients, setClients] = useState<any[] | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    fetch('/api/clients')
+      .then((r) => r.json())
+      .then((p) => {
+        if (!mounted) return
+        if (p?.data) setClients(p.data)
+      })
+      .catch(() => {})
+    return () => { mounted = false }
+  }, [])
+
+  const list = clients || []
+
   return (
     <div className="space-y-6 mt-18 md:mt-0">
       <div>
@@ -59,25 +37,21 @@ export default function ClientsPage() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Total Clients</p>
-            <p className="text-3xl font-bold text-foreground mt-2">{mockClients.length}</p>
+            <p className="text-3xl font-bold text-foreground mt-2">{list.length}</p>
             <p className="text-xs text-muted-foreground mt-1">+2 this month</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Returning Clients</p>
-            <p className="text-3xl font-bold text-foreground mt-2">
-              {mockClients.filter((c) => c.status !== "New").length}
-            </p>
+            <p className="text-3xl font-bold text-foreground mt-2">{list.filter((c) => c.status !== 'new').length}</p>
             <p className="text-xs text-muted-foreground mt-1">75% retention</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Avg. Spending</p>
-            <p className="text-3xl font-bold text-foreground mt-2">
-              {formatCurrency(Math.round(mockClients.reduce((sum, c) => sum + c.totalSpent, 0) / mockClients.length))}
-            </p>
+            <p className="text-3xl font-bold text-foreground mt-2">{formatCurrency(Math.round((list.reduce((sum, c) => sum + (c.total_spent || 0), 0) || 0) / Math.max(1, list.length)))}</p>
             <p className="text-xs text-muted-foreground mt-1">per client</p>
           </CardContent>
         </Card>
@@ -102,19 +76,19 @@ export default function ClientsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockClients.map((client) => (
+                {list.map((client) => (
                   <TableRow key={client.id}>
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell className="text-sm">{client.phone}</TableCell>
-                    <TableCell className="text-sm">{client.visits}</TableCell>
-                    <TableCell className="text-sm font-semibold">{formatCurrency(client.totalSpent)}</TableCell>
-                    <TableCell className="text-sm">{client.lastVisit}</TableCell>
+                    <TableCell className="text-sm">{client.visits || 0}</TableCell>
+                    <TableCell className="text-sm font-semibold">{formatCurrency(client.total_spent || 0)}</TableCell>
+                    <TableCell className="text-sm">{client.last_visit || ''}</TableCell>
                     <TableCell>
                       <Badge
                         className={
                           client.status === "VIP"
                             ? "bg-purple-100 text-purple-800"
-                            : client.status === "Regular"
+                            : client.status === "regular"
                               ? "bg-blue-100 text-blue-800"
                               : "bg-green-100 text-green-800"
                         }
