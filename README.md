@@ -29,9 +29,9 @@ Creating users, profiles, and access codes (admin flow):
 
 Example SQL insert (replace `<BCRYPT_HASH>`):
 
-```sql
+\`\`\`sql
 INSERT INTO public.access_codes (role, hashed_code, active) VALUES ('owner', '<BCRYPT_HASH>', true);
-```
+\`\`\`
 
 Notes:
 - Install dependencies for hashing: `npm install bcryptjs` (server-side hashing uses `bcryptjs`).
@@ -48,4 +48,3 @@ Security notes:
 
 - Using the service role key server-side prevents account enumeration and prevents public sign-up via client-side calls.
 - Server-issued signed cookies expire per `SESSION_TTL_SECONDS` and are validated on each server request. Keep `SESSION_SECRET` secret and rotate periodically.
-
