@@ -22,8 +22,8 @@ export function Header({ dateRange, setDateRange }: HeaderProps) {
     <header className="border-b border-border bg-card p-4 md:p-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">Welcome back to Bunny Spa</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Hello!</h1>
+          <p className="text-sm text-muted-foreground mt-1">Welcome to Bunny Spa</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">

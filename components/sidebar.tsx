@@ -16,12 +16,15 @@ const navItems = [
   { label: "Reports", icon: BarChart3, href: "/b/reports" },
 ]
 
+
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(true)
   const pathname = usePathname()
   const router = useRouter()
   const { signOut } = useAuth()
-
+  
+  const handleNavClick = () => setIsOpen(false)
+  
   return (
     <>
       {/* Mobile toggle button */}
@@ -46,25 +49,27 @@ export function Sidebar() {
           <p className="text-xs text-sidebar-foreground/60 mt-1">Business Manager</p>
         </div>
 
-        <nav className="flex-1 space-y-2 p-4">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Link key={item.href} href={item.href}>
-                <Button
-                  variant={isActive ? "default" : "ghost"}
-                  className={cn(
-                    "w-full justify-start",
-                    isActive && "bg-sidebar-primary text-sidebar-primary-foreground",
-                  )}
-                >
-                  <item.icon className="mr-2 h-4 w-4" />
-                  {item.label}
-                </Button>
-              </Link>
-            )
-          })}
-        </nav>
+      <nav className="flex-1 space-y-2 p-4">
+  {navItems.map((item) => {
+    const isActive = pathname === item.href
+
+    return (
+      <Link key={item.href} href={item.href} onClick={handleNavClick}>
+        <Button
+          variant={isActive ? "default" : "ghost"}
+          className={cn(
+            "w-full justify-start",
+            isActive && "bg-sidebar-primary text-sidebar-primary-foreground",
+          )}
+        >
+          <item.icon className="mr-2 h-4 w-4" />
+          {item.label}
+        </Button>
+      </Link>
+    )
+  })}
+</nav>
+
 
         <div className="border-t border-sidebar-border p-4">
           <button

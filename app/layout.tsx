@@ -5,22 +5,23 @@ import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-context"
 import "./globals.css"
+import { Sidebar } from "@/components/sidebar"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Bunny Spa Admin",
+  title: "Bunny Spa",
   description: "Sales and business management dashboard",
   generator: "v0.app",
   icons: {
     icon: [
       {
-        url: "/BUNNY-MASSAGE-LOGO.png",
+        url: "/placeholder.jpg",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/BUNNY-MASSAGE-LOGO.png",
+        url: "/placeholder.jpg",
         media: "(prefers-color-scheme: dark)",
       },
       {
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
         type: "image/svg+xml",
       },
     ],
-    apple: "/BUNNY-MASSAGE-LOGO.png",
+    apple: "/placeholder.jpg",
   },
 }
 
@@ -41,7 +42,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+          <Sidebar />
+            {children}
+          </AuthProvider>
         </ThemeProvider>
         <Analytics />
       </body>
