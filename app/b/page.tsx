@@ -7,45 +7,79 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Users, Briefcase, Plus } from "lucide-react"
 import Link from "next/link"
 import { Header } from "@/components/header"
+import { formatCurrency } from "@/lib/currency"
 import { useState, useEffect } from "react"
 
 export default function DashboardPage() {
   const [dateRange, setDateRange] = useState({ from: new Date("2025-01-01"), to: new Date() })
   const [overview, setOverview] = useState<any | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let mounted = true
     fetch('/api/reports/overview')
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`API error: ${r.status}`)
+        }
+        return r.json()
+      })
       .then((p) => {
         if (!mounted) return
-        if (!p?.error) setOverview(p)
+        if (p?.error) {
+          setError(p.error)
+          console.error('Reports API error:', p.error)
+        } else {
+          setOverview(p)
+          setError(null)
+          console.log('Reports loaded:', p)
+        }
       })
-      .catch(() => {})
+      .catch((err) => {
+        if (!mounted) return
+        console.error('Fetch error:', err)
+        setError(err.message)
+      })
     return () => { mounted = false }
   }, [])
 
-  const revenue = (overview?.revenueByService || []).reduce((s: number, r: any) => s + Number(r.total_revenue || 0), 0)
-  const profit = (overview?.revenueByService || []).reduce((s: number, r: any) => s + Number(r.total_profit || 0), 0)
+  // Prefer month-scoped totals returned by the overview API
+  const revenue = Number(overview?.totalRevenueMonth || 0)
+  const profit = Number(overview?.totalProfitMonth || 0)
   const outstanding = Number(overview?.outstandingBalance || 0)
   const servicesCompleted = Number(overview?.servicesCompleted || 0)
 
   const stats = [
-    { icon: DollarSign, label: 'Total Revenue (Month)', value: `₵${revenue}`, change: '+12% from last month', trend: 'up' as const },
-    { icon: TrendingUp, label: 'Total Profit', value: `₵${profit}`, change: '+8% from last month', trend: 'up' as const },
-    { icon: AlertCircle, label: 'Outstanding Balance', value: `₵${outstanding}`, change: '+₵450 due', trend: 'down' as const },
+    { icon: DollarSign, label: 'Total Revenue (Month)', value: formatCurrency(revenue), change: '+12% from last month', trend: 'up' as const },
+    { icon: TrendingUp, label: 'Total Profit', value: formatCurrency(profit), change: '+8% from last month', trend: 'up' as const },
+    { icon: AlertCircle, label: 'Outstanding Balance', value: formatCurrency(outstanding), change: '+₵450 due', trend: 'down' as const },
     { icon: CheckCircle, label: 'Services Completed', value: `${servicesCompleted}`, change: '+24 this week', trend: 'up' as const },
   ]
 
-  type Breakdown = { type: string; count: number; percentage: number }
-  const serviceBreakdown: Breakdown[] = (overview?.locationData || []).map((l: any) => ({ type: l.location_type === 'In-Shop' ? 'In-Shop Services' : l.location_type, count: Number(l.value || 0), percentage: 0 }))
+  type Breakdown = { type: string; value: number; percentage: number }
+  // Location data from API is revenue by location - present it as currency breakdown
+  const serviceBreakdown: Breakdown[] = (overview?.locationData || []).map((l: any) => ({ type: l.location_type === 'In-Shop' ? 'In-Shop Services' : l.location_type, value: Number(l.value || 0), percentage: 0 }))
   // fill percentages conservatively
-  const totalBreakdown = serviceBreakdown.reduce((s: number, x: Breakdown) => s + x.count, 0)
-  serviceBreakdown.forEach((s: Breakdown) => (s.percentage = totalBreakdown ? Math.round((s.count / totalBreakdown) * 100) : 0))
+  const totalBreakdown = serviceBreakdown.reduce((s: number, x: Breakdown) => s + x.value, 0)
+  serviceBreakdown.forEach((s: Breakdown) => (s.percentage = totalBreakdown ? Math.round((s.value / totalBreakdown) * 100) : 0))
 
   return (
     <div className="space-y-6 mt-18 md:mt-0">
       <Header dateRange={dateRange} setDateRange={setDateRange} />
+      
+      {/* Debug: Show error if API failed */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded text-red-800 text-sm">
+          <strong>API Error:</strong> {error}. Check browser console and ensure you're authenticated.
+        </div>
+      )}
+
+      {/* Debug: Show if loading */}
+      {/* {!overview && !error && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded text-blue-800 text-sm">
+          Loading reports...
+        </div>
+      )} */}
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, idx) => (
@@ -65,7 +99,7 @@ export default function DashboardPage() {
                 <div key={service.type} className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{service.type}</p>
-                    <p className="text-sm text-muted-foreground">{service.count} services</p>
+                    <p className="text-sm text-muted-foreground">{formatCurrency(service.value)} revenue</p>
                   </div>
                   <div className="text-right">
                     <div className="h-2 w-24 bg-muted rounded-full overflow-hidden">

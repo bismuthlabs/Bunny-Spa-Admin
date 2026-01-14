@@ -24,12 +24,22 @@ export async function GET(req: Request) {
         .order('name')
 
       // compute simple stats in JS
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+      const endOfMonth = now.toISOString().split('T')[0]
+
       const enriched = await Promise.all((simple || []).map(async (c: any) => {
-        const { data: agg } = await supabaseAdmin.from('sales').select('SUM(amount_paid) as total_spent, COUNT(*) as visits, MAX(service_date) as last_visit').eq('client_id', c.id)
-        const total_spent = (agg && agg[0] && Number(agg[0].total_spent || 0)) || 0
-        const visits = (agg && agg[0] && Number(agg[0].visits || 0)) || 0
-        const last_visit = (agg && agg[0] && agg[0].last_visit) || null
-        return { ...c, total_spent, visits, last_visit }
+        const { data: agg } = await supabaseAdmin.from('sales').select('amount_paid, service_date').eq('client_id', c.id)
+        const total_spent = (agg && agg.reduce((sum: number, row: any) => sum + Number(row.amount_paid || 0), 0)) || 0
+        const visits = (agg && agg.length) || 0
+        const last_visit = (agg && agg.length > 0 && agg[agg.length - 1].service_date) || null
+
+        // month-scoped aggregates (this month)
+        const { data: monthAgg } = await supabaseAdmin.from('sales').select('amount_paid').eq('client_id', c.id).gte('service_date', startOfMonth).lte('service_date', endOfMonth).eq('status', 'completed')
+        const total_spent_month = (monthAgg && monthAgg.reduce((sum: number, row: any) => sum + Number(row.amount_paid || 0), 0)) || 0
+        const visits_month = (monthAgg && monthAgg.length) || 0
+
+        return { ...c, total_spent, visits, last_visit, total_spent_month, visits_month }
       }))
 
       return NextResponse.json({ data: enriched })
