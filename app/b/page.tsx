@@ -88,19 +88,19 @@ export default function DashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Link href="/dashboard/sales?action=new" className="block">
+            <Link href="/b/sales?action=new" className="block">
               <Button className="w-full" size="sm">
                 {/* <Plus className="mr-2 h-4 w-4" /> */}
                 Add New Sale
               </Button>
             </Link>
-            <Link href="/dashboard/clients" className="block">
+            <Link href="/b/clients" className="block">
               <Button variant="outline" className="w-full bg-transparent" size="sm">
                 <Users className="mr-2 h-4 w-4" />
                 View Clients
               </Button>
             </Link>
-            <Link href="/dashboard/staff" className="block">
+            <Link href="/b/staff" className="block">
               <Button variant="outline" className="w-full bg-transparent" size="sm">
                 <Briefcase className="mr-2 h-4 w-4" />
                 Staff Info

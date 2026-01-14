@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth-context"
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Sales", icon: ShoppingCart, href: "/dashboard/sales" },
-  { label: "Clients", icon: Users, href: "/dashboard/clients" },
-  { label: "Staff", icon: Briefcase, href: "/dashboard/staff" },
-  { label: "Reports", icon: BarChart3, href: "/dashboard/reports" },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/b" },
+  { label: "Sales", icon: ShoppingCart, href: "/b/sales" },
+  { label: "Clients", icon: Users, href: "/b/clients" },
+  { label: "Staff", icon: Briefcase, href: "/b/staff" },
+  { label: "Reports", icon: BarChart3, href: "/b/reports" },
 ]
 
 export function Sidebar() {

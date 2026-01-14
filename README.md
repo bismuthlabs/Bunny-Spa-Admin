@@ -18,13 +18,13 @@ Server-side enforcement:
 - Magic link authentication has been removed in favor of server-verified passcodes.
 - New flow: operators enter a passcode at `/unlock`. The server verifies against bcrypt-hashed codes in `access_codes`, and issues a signed, HTTP-only session cookie (no Supabase Auth sessions are used).
 - Role-based routing is implemented via the server cookie (`role`, `issuedAt`, `expiresAt`).
-- Admin UI is available at `/dashboard/admin` (owner-only) to create/activate/deactivate profiles and set roles.
+- Admin UI is available at `/b/admin` (owner-only) to create/activate/deactivate profiles and set roles.
 
 Creating users, profiles, and access codes (admin flow):
 
 1. **Add a server SESSION_SECRET**: set `SESSION_SECRET` in your environment (see `.env.local.example`).
 2. **Create access codes** either:
-   - Use the Admin UI: Sign in as an `owner` and go to `/dashboard/admin` → Access Codes to create a passcode (the server hashes using bcrypt), or
+   - Use the Admin UI: Sign in as an `owner` and go to `/b/admin` → Access Codes to create a passcode (the server hashes using bcrypt), or
    - Manually insert a bcrypt hash into `access_codes` (use `bcryptjs` locally to generate a hash and insert it via SQL).
 
 Example SQL insert (replace `<BCRYPT_HASH>`):
@@ -38,9 +38,9 @@ Notes:
 - Quick test checklist:
   1. Run `sql/supabase_access_codes_table.sql` in Supabase to create `access_codes` table.
   2. Set `SESSION_SECRET` in `.env.local` and `SUPABASE_SERVICE_ROLE_KEY` (server-only).
-  3. Create an owner code using the Admin UI (`/dashboard/admin`) or insert a bcrypt hash into the DB.
-  4. Visit `/unlock`, enter the passcode, and verify you are redirected to `/dashboard`.
-  5. Try accessing `/dashboard/admin` as non-owner — you should be redirected to `/unlock`.
+  3. Create an owner code using the Admin UI (`/b/admin`) or insert a bcrypt hash into the DB.
+  4. Visit `/unlock`, enter the passcode, and verify you are redirected to `/b`.
+  5. Try accessing `/b/admin` as non-owner — you should be redirected to `/unlock`.
 - The unlock flow (`/unlock`) only requires a passcode; no email, no magic link, and no Supabase Auth sessions are used.
 
 

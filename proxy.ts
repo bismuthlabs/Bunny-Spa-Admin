@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
   const response = await updateSession(request)
 
   // Protected routes
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (request.nextUrl.pathname.startsWith("/b")) {
     const session = request.cookies.get("bsa_session")
 
     if (!session) {

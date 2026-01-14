@@ -36,7 +36,7 @@ export default function UnlockPage() {
         el?.focus()
       } else {
         // Perform a hard navigation so the newly-set HttpOnly cookie is included in the next request
-        window.location.assign('/dashboard')
+        window.location.assign('/b')
       }
     } catch (err) {
       setError('Server error. Please try again.')

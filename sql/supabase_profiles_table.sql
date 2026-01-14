@@ -37,4 +37,4 @@ CREATE POLICY "Update own profile" ON public.profiles
 -- 5) Notes:
 -- - Disable public sign-ups in Supabase Authentication settings (Dashboard > Authentication > Settings > Disable "Allow new signups").
 -- - Use a SUPABASE_SERVICE_ROLE_KEY for admin server-side actions that modify sensitive tables (profiles, access_codes).
--- - To add passcodes, create bcrypt hashes and insert into `access_codes`, or use the Admin UI (`/dashboard/admin`).
+-- - To add passcodes, create bcrypt hashes and insert into `access_codes`, or use the Admin UI (`/b/admin`).
