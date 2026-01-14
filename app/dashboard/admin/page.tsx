@@ -1,30 +1,27 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
+import { parseSessionFromRequest } from "@/lib/session"
 import AdminProfiles from "@/components/admin-profiles"
+import AdminAccessCodes from "@/components/admin-access-codes"
 
 export default async function AdminPage() {
-  const supabase = await createServerSupabaseClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Check our server-side session cookie
+  const cookieStore = cookies()
+  const cookieHeader = (await cookieStore).getAll().map((c) => `${c.name}=${c.value}`).join('; ')
+  const req = new Request('http://localhost', { headers: { cookie: cookieHeader } })
+  const session = parseSessionFromRequest(req)
 
-  if (!session?.user?.email) {
-    redirect("/auth/login")
-  }
-
-  const email = session.user.email
-  const { data: profile, error } = await supabase.from("profiles").select("role, active").eq("email", email).limit(1).maybeSingle()
-
-  if (error || !profile || !profile.active || profile.role !== "owner") {
-    // not authorized, send to main dashboard
-    redirect("/dashboard?error=not_authorized")
+  if (!session || session.expiresAt < Date.now() || session.role !== 'owner') {
+    redirect('/unlock')
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Admin — Manage Profiles</h1>
-      {/* Client component does the real work */}
-      <AdminProfiles />
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold mb-4">Admin — Manage Profiles & Access Codes</h1>
+      <div className="grid gap-6 md:grid-cols-2">
+        <div><AdminProfiles /></div>
+        <div><AdminAccessCodes /></div>
+      </div>
     </div>
   )
 }

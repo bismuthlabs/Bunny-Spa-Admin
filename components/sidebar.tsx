@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, ShoppingCart, Users, Briefcase, BarChart3, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/components/auth-context"
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -18,6 +19,8 @@ const navItems = [
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(true)
   const pathname = usePathname()
+  const router = useRouter()
+  const { signOut } = useAuth()
 
   return (
     <>
@@ -64,9 +67,17 @@ export function Sidebar() {
         </nav>
 
         <div className="border-t border-sidebar-border p-4">
-          <Button variant="outline" className="w-full text-xs bg-transparent">
-            Sign Out
-          </Button>
+          <button
+            className="w-full text-xs bg-transparent text-left"
+            onClick={async () => {
+              try {
+                await signOut()
+                router.push('/unlock')
+              } catch {}
+            }}
+          >
+            <span className="w-full text-xs bg-transparent">Sign Out</span>
+          </button>
         </div>
       </aside>
 

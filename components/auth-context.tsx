@@ -2,12 +2,16 @@
 
 import type React from "react"
 
-import { createClient } from "@/lib/supabase/client"
-import type { Session } from "@supabase/supabase-js"
 import { createContext, useContext, useEffect, useState } from "react"
 
+interface SessionPayload {
+  role: 'owner' | 'manager' | 'investor'
+  issuedAt: number
+  expiresAt: number
+}
+
 interface AuthContextType {
-  session: Session | null
+  session: SessionPayload | null
   loading: boolean
   signOut: () => Promise<void>
 }
@@ -15,31 +19,22 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<SessionPayload | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session)
-      setLoading(false)
-    })
-
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-    })
-
-    return () => {
-      subscription?.unsubscribe()
-    }
-  }, [supabase])
+    // Fetch server session
+    fetch('/api/session')
+      .then((r) => r.json())
+      .then((json) => {
+        setSession(json.session)
+      })
+      .catch(() => setSession(null))
+      .finally(() => setLoading(false))
+  }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    await fetch('/api/logout', { method: 'POST' })
     setSession(null)
   }
 

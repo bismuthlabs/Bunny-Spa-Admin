@@ -36,5 +36,5 @@ CREATE POLICY "Update own profile" ON public.profiles
 
 -- 5) Notes:
 -- - Disable public sign-ups in Supabase Authentication settings (Dashboard > Authentication > Settings > Disable "Allow new signups").
--- - Configure magic link expiration in Supabase Auth settings (set a short expiry for email links).
--- - Use a SUPABASE_SERVICE_ROLE_KEY in server-side code to send magic links only after verifying a profile is active (see app/api/auth/send-magic-link/route.ts).
+-- - Use a SUPABASE_SERVICE_ROLE_KEY for admin server-side actions that modify sensitive tables (profiles, access_codes).
+-- - To add passcodes, create bcrypt hashes and insert into `access_codes`, or use the Admin UI (`/dashboard/admin`).

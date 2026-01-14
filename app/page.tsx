@@ -11,7 +11,7 @@ export default function Home() {
         <p className="text-lg text-muted-foreground">
           Manage your salon operations, track sales, and grow your business
         </p>
-        <Link href="/auth/login">
+        <Link href="/unlock">
           <Button size="lg" className="mt-6">
             Get Started
           </Button>

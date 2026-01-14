@@ -17,7 +17,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!loading && !session) {
-      redirect("/auth/login")
+      redirect('/unlock')
     }
   }, [session, loading])
 

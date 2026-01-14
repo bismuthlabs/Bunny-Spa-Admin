@@ -2,44 +2,50 @@
 
 ## Authentication (Supabase)
 
-🔧 This project uses Supabase passwordless (email magic link) authentication with additional controls.
+🔧 This project uses server-verified passcode authentication (no email auth). Admins create bcrypt-hashed access codes and the server issues signed, HTTP-only session cookies.
 
 Important steps and notes:
 
 - Create a `profiles` table in your Supabase project (SQL provided in `sql/supabase_profiles_table.sql`).
 - In the Supabase dashboard, disable public sign-ups: Authentication → Settings → turn off **Allow new signups**.
 - Add the service role key to your environment as `SUPABASE_SERVICE_ROLE_KEY` (do not commit this key).
-- Configure magic link expiry in Supabase Auth settings to a short lifetime (e.g., 10 minutes) to limit link duration.
-- Add `https://your-app-url/auth/callback` (or `http://localhost:3000/auth/callback` in dev) to **Redirect URLs** in the Supabase Authentication settings.
+- Disable any public sign-up flows in Supabase and ensure only admins manage access codes.
 
 - Admins should create auth users and profiles ahead of time. See `sql/supabase_profiles_table.sql` for an example insert.
 
 Server-side enforcement:
 
-- The app sends magic links using a server-only endpoint (`POST /api/auth/send-magic-link`) which will only send a link if an active profile exists for the email.
-- The callback at `/auth/callback` checks that the logged-in user has an active `profiles` entry and redirects based on role (`owner` → `/dashboard`, `manager` → `/dashboard?view=ops`).
+- Magic link authentication has been removed in favor of server-verified passcodes.
+- New flow: operators enter a passcode at `/unlock`. The server verifies against bcrypt-hashed codes in `access_codes`, and issues a signed, HTTP-only session cookie (no Supabase Auth sessions are used).
+- Role-based routing is implemented via the server cookie (`role`, `issuedAt`, `expiresAt`).
 - Admin UI is available at `/dashboard/admin` (owner-only) to create/activate/deactivate profiles and set roles.
 
-Creating users and profiles (recommended admin flow):
+Creating users, profiles, and access codes (admin flow):
 
-1. Create an auth user using the Supabase dashboard (Authentication → Users) or via the Admin API (example using the service role key):
+1. **Add a server SESSION_SECRET**: set `SESSION_SECRET` in your environment (see `.env.local.example`).
+2. **Create access codes** either:
+   - Use the Admin UI: Sign in as an `owner` and go to `/dashboard/admin` → Access Codes to create a passcode (the server hashes using bcrypt), or
+   - Manually insert a bcrypt hash into `access_codes` (use `bcryptjs` locally to generate a hash and insert it via SQL).
 
-```js
-import { createClient } from '@supabase/supabase-js'
-const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-await supabaseAdmin.auth.admin.createUser({ email: 'alice@example.com', email_confirm: true })
-```
-
-2. Insert a matching row into `profiles` (you can set `auth_id` to the created user's id):
+Example SQL insert (replace `<BCRYPT_HASH>`):
 
 ```sql
-INSERT INTO public.profiles (auth_id, email, role, active) VALUES ('<AUTH_USER_ID>', 'alice@example.com', 'owner', true);
+INSERT INTO public.access_codes (role, hashed_code, active) VALUES ('owner', '<BCRYPT_HASH>', true);
 ```
 
-This ensures that only pre-created accounts can receive magic links and sign in.
+Notes:
+- Install dependencies for hashing: `npm install bcryptjs` (server-side hashing uses `bcryptjs`).
+- Quick test checklist:
+  1. Run `sql/supabase_access_codes_table.sql` in Supabase to create `access_codes` table.
+  2. Set `SESSION_SECRET` in `.env.local` and `SUPABASE_SERVICE_ROLE_KEY` (server-only).
+  3. Create an owner code using the Admin UI (`/dashboard/admin`) or insert a bcrypt hash into the DB.
+  4. Visit `/unlock`, enter the passcode, and verify you are redirected to `/dashboard`.
+  5. Try accessing `/dashboard/admin` as non-owner — you should be redirected to `/unlock`.
+- The unlock flow (`/unlock`) only requires a passcode; no email, no magic link, and no Supabase Auth sessions are used.
+
 
 Security notes:
 
 - Using the service role key server-side prevents account enumeration and prevents public sign-up via client-side calls.
-- Magic links are time-limited by Supabase settings; they are consumed once when used to create a session (single-use by design).
+- Server-issued signed cookies expire per `SESSION_TTL_SECONDS` and are validated on each server request. Keep `SESSION_SECRET` secret and rotate periodically.
 

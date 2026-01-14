@@ -8,10 +8,11 @@ export async function proxy(request: NextRequest) {
 
   // Protected routes
   if (request.nextUrl.pathname.startsWith("/dashboard")) {
-    const session = request.cookies.get("sb-auth-token")
+    const session = request.cookies.get("bsa_session")
 
     if (!session) {
-      return NextResponse.redirect(new URL("/auth/login", request.url))
+      // Server-verified passcode session required
+      return NextResponse.redirect(new URL('/unlock', request.url))
     }
   }
 
