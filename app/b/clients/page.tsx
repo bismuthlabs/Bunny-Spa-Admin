@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatCurrency } from "@/lib/currency"
+import { ClientProfileModal } from "@/components/client-profile-modal"
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[] | null>(null)
+  const [selectedClient, setSelectedClient] = useState<any | null>(null)
+  const [profileOpen, setProfileOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -25,6 +28,11 @@ export default function ClientsPage() {
   }, [])
 
   const list = clients || []
+
+  const handleViewProfile = (client: any) => {
+    setSelectedClient(client)
+    setProfileOpen(true)
+  }
 
   return (
     <div className="space-y-6 mt-18 md:mt-0">
@@ -104,9 +112,9 @@ export default function ClientsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Profile</DropdownMenuItem>
-                          <DropdownMenuItem>Schedule Visit</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">Remove Client</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewProfile(client)}>View Profile</DropdownMenuItem>
+                          <DropdownMenuItem disabled>Schedule Visit (coming soon)</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" disabled>Remove Client (coming soon)</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -117,6 +125,12 @@ export default function ClientsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <ClientProfileModal
+        open={profileOpen}
+        onOpenChange={setProfileOpen}
+        client={selectedClient}
+      />
     </div>
   )
 }

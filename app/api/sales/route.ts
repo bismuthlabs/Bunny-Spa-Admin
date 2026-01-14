@@ -103,3 +103,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Server error" }, { status: 500 })
   }
 }
+
+// DELETE: delete a sale by ID (owner/manager only)
+export async function DELETE(req: Request) {
+  try {
+    const payload = parseSessionFromRequest(req)
+    if (!payload) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+    if (!["owner", "manager"].includes(payload.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+
+    const url = new URL(req.url)
+    const saleId = url.searchParams.get("id")
+    if (!saleId) return NextResponse.json({ error: "Missing sale ID" }, { status: 400 })
+
+    const { error } = await supabaseAdmin.from("sales").delete().eq("id", saleId)
+    if (error) throw error
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ error: "Server error" }, { status: 500 })
+  }
+}

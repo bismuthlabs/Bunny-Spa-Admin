@@ -8,6 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal, Search } from "lucide-react"
 import { formatCurrency } from "@/lib/currency"
+import { SalesDetailsModal } from "./sales-details-modal"
+import { DeleteSaleDialog } from "./delete-sale-dialog"
 
 interface Sale {
   id: string
@@ -27,9 +29,12 @@ interface Sale {
 }
 
 export function SalesTable() {
-const [sales, setSales] = useState<Sale[] | null>(null)
+  const [sales, setSales] = useState<Sale[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<keyof Sale>("date")
@@ -98,6 +103,21 @@ const [sales, setSales] = useState<Sale[] | null>(null)
       setSortBy(column)
       setSortOrder("desc")
     }
+  }
+
+  const handleViewDetails = (sale: Sale) => {
+    setSelectedSale(sale)
+    setDetailsOpen(true)
+  }
+
+  const handleDeleteClick = (sale: Sale) => {
+    setSelectedSale(sale)
+    setDeleteOpen(true)
+  }
+
+  const handleDeleteSuccess = () => {
+    setSales((prev) => prev ? prev.filter((s) => s.id !== selectedSale?.id) : null)
+    setSelectedSale(null)
   }
 
   return (
@@ -176,9 +196,9 @@ const [sales, setSales] = useState<Sale[] | null>(null)
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleViewDetails(sale)}>View Details</DropdownMenuItem>
+                      <DropdownMenuItem disabled>Edit (coming soon)</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(sale)}>Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -187,6 +207,16 @@ const [sales, setSales] = useState<Sale[] | null>(null)
           </TableBody>
         </Table>
       </div>
+
+      <SalesDetailsModal open={detailsOpen} onOpenChange={setDetailsOpen} sale={selectedSale} />
+      <DeleteSaleDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        saleId={selectedSale?.id || ""}
+        clientName={selectedSale?.clientName || ""}
+        serviceName={selectedSale?.serviceName || ""}
+        onDeleteSuccess={handleDeleteSuccess}
+      />
     </div>
   )
 }
