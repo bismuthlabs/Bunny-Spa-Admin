@@ -9,11 +9,13 @@ import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatCurrency } from "@/lib/currency"
 import { ClientProfileModal } from "@/components/client-profile-modal"
+import { DeleteClientDialog } from "@/components/delete-client-dialog"
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<any[] | null>(null)
   const [selectedClient, setSelectedClient] = useState<any | null>(null)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -32,6 +34,16 @@ export default function ClientsPage() {
   const handleViewProfile = (client: any) => {
     setSelectedClient(client)
     setProfileOpen(true)
+  }
+
+  const handleDeleteClick = (client: any) => {
+    setSelectedClient(client)
+    setDeleteOpen(true)
+  }
+
+  const onDeleteSuccess = () => {
+    setClients((prev) => prev ? prev.filter((c) => c.id !== selectedClient.id) : null)
+    setDeleteOpen(false)
   }
 
   return (
@@ -114,7 +126,7 @@ export default function ClientsPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleViewProfile(client)}>View Profile</DropdownMenuItem>
                           <DropdownMenuItem disabled>Schedule Visit (coming soon)</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive" disabled>Remove Client (coming soon)</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(client)}>Remove Client</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -130,6 +142,16 @@ export default function ClientsPage() {
         open={profileOpen}
         onOpenChange={setProfileOpen}
         client={selectedClient}
+      />
+
+      <DeleteClientDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        clientId={selectedClient?.id || ""}
+        clientName={selectedClient?.name || ""}
+        visits={selectedClient?.visits || 0}
+        totalSpent={selectedClient?.total_spent || 0}
+        onDeleteSuccess={onDeleteSuccess}
       />
     </div>
   )

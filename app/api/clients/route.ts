@@ -70,3 +70,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const payload = parseSessionFromRequest(req)
+    if (!payload) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+    if (!["owner", "manager"].includes(payload.role)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+
+    const url = new URL(req.url)
+    const clientId = url.searchParams.get("id")
+    if (!clientId) return NextResponse.json({ error: "Missing client ID" }, { status: 400 })
+
+    const { error } = await supabaseAdmin.from("clients").delete().eq("id", clientId)
+    if (error) throw error
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ error: "Server error" }, { status: 500 })
+  }
+}
