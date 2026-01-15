@@ -43,7 +43,7 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            <div className="flex h-scree">
+            <div className="flex md:h-screen">
               <Sidebar />
               <main className="flex-1 overflow-x-auto bg-background p-4 md:p-6 lg:p-8">
                 {children}
